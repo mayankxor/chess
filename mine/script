@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+URL="https://lichess.org/api/games/user/mayankxor?tags=true&clocks=true&evals=true&opening=true&literate=true&perfType=rapid"
+
+OUTPUT="mayankxor_rapid_games.pgn"
+TEMP_FILE="$(mktemp)"
+
+# Download to temporary file
+wget -q -O "$TEMP_FILE" "$URL"
+
+# If output file does not exist, move temp to output
+if [ ! -f "$OUTPUT" ]; then
+    mv "$TEMP_FILE" "$OUTPUT"
+    echo "File downloaded and saved as $OUTPUT"
+    exit 0
+fi
+
+# Compare files
+if cmp -s "$TEMP_FILE" "$OUTPUT"; then
+    echo "No changes detected."
+    rm "$TEMP_FILE"
+else
+    echo "Changes detected. Updating file."
+    mv "$TEMP_FILE" "$OUTPUT"
+fi
